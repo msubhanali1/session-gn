@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhatsApp Pairing</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #25D366;
+      --green-dark: #128C7E;
+      --green-light: #DCF8C6;
+      --bg: #0a0f0d;
+      --surface: #111a16;
+      --surface2: #182218;
+      --border: #1f3028;
+      --text: #e8f5e9;
+      --muted: #6b9e7a;
+      --white: #ffffff;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    /* ── Animated background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(37,211,102,0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 460px;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .logo {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      box-shadow: 0 0 40px rgba(37,211,102,0.25);
+    }
+
+    .logo svg { width: 36px; height: 36px; fill: white; }
+
+    .header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--white);
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      background: var(--surface2);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 28px;
+      gap: 4px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab.active {
+      background: var(--green);
+      color: white;
+      box-shadow: 0 2px 12px rgba(37,211,102,0.35);
+    }
+
+    /* ── Input ── */
+    .input-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .input-wrap {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .input-wrap .flag {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 16px 14px 44px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(37,211,102,0.12);
+    }
+
+    input[type="text"]::placeholder { color: #3a5c45; }
+
+    /* ── Button ── */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(37,211,102,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover { opacity: 0.92; box-shadow: 0 6px 28px rgba(37,211,102,0.4); }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Result box ── */
+    .result {
+      margin-top: 24px;
+      display: none;
+    }
+
+    .code-box {
+      background: var(--surface2);
+      border: 1.5px solid var(--green);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .code-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .code-value {
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: 8px;
+      color: var(--green);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .copy-btn {
+      width: 100%;
+      padding: 11px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .copy-btn:hover { border-color: var(--green); color: var(--green); }
+    .copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+    .steps {
+      background: var(--surface2);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .steps-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: #a8c9b2;
+      line-height: 1.5;
+    }
+    .step:last-child { margin-bottom: 0; }
+
+    .step-num {
+      min-width: 22px;
+      height: 22px;
+      background: var(--green-dark);
+      color: white;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* ── Error ── */
+    .error-box {
+      background: rgba(255,80,80,0.08);
+      border: 1px solid rgba(255,80,80,0.25);
+      border-radius: 10px;
+      padding: 14px 16px;
+      color: #ff8080;
+      font-size: 13px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    /* ── API info ── */
+    .api-info {
+      margin-top: 20px;
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .api-info p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .api-url {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: var(--green);
+      background: var(--bg);
+      padding: 8px 10px;
+      border-radius: 7px;
+      word-break: break-all;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 12px;
+      color: #2e4a38;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="header">
+      <div class="logo">
+        <!-- WhatsApp icon SVG -->
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+      </div>
+      <h1>WhatsApp Linker</h1>
+      <p>Link your WhatsApp device in seconds</p>
+    </div>
+
+    <div class="card">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('pair')">📱 Pair Code</button>
+        <button class="tab" onclick="switchTab('api')">🔗 API</button>
+      </div>
+
+      <!-- PAIR TAB -->
+      <div id="tab-pair">
+        <label class="input-label">WhatsApp Number</label>
+        <div class="input-wrap">
+          <span class="flag">📞</span>
+          <input type="text" id="phoneInput" placeholder="923001234567" maxlength="15" />
+        </div>
+
+        <button class="btn" id="generateBtn" onclick="generateCode()">
+          <span id="btnText">Generate Pair Code</span>
+          <div class="spinner" id="spinner"></div>
+        </button>
+
+        <div class="result" id="result">
+          <div class="code-box">
+            <div class="code-label">Your Pairing Code</div>
+            <div class="code-value" id="codeValue">----</div>
+          </div>
+          <button class="copy-btn" id="copyBtn" onclick="copyCode()">
+            📋 Copy Code
+          </button>
+          <div class="steps">
+            <div class="steps-title">How to Link</div>
+            <div class="step"><span class="step-num">1</span> Open WhatsApp on your phone</div>
+            <div class="step"><span class="step-num">2</span> Go to Settings → Linked Devices</div>
+            <div class="step"><span class="step-num">3</span> Tap "Link a Device"</div>
+            <div class="step"><span class="step-num">4</span> Tap "Link with phone number instead"</div>
+            <div class="step"><span class="step-num">5</span> Enter the code above ✅</div>
+          </div>
+        </div>
+
+        <div class="error-box" id="errorBox"></div>
+      </div>
+
+      <!-- API TAB -->
+      <div id="tab-api" style="display:none;">
+        <div class="api-info">
+          <p>🔗 Pair Code API Endpoint</p>
+          <div class="api-url" id="apiUrl">Loading...</div>
+        </div>
+        <div class="api-info" style="margin-top:12px;">
+          <p>📖 Usage Example</p>
+          <div class="api-url">GET /pair?number=923001234567</div>
+        </div>
+        <div class="api-info" style="margin-top:12px;">
+          <p>✅ Response Format</p>
+          <div class="api-url">{ "error": false, "code": "ABCD-1234", "number": "923..." }</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer">
+      Made with ❤️ using Baileys &amp; Node.js
+    </div>
+  </div>
+
+  <script>
+    // Set API URL dynamically
+    document.getElementById('apiUrl').textContent = window.location.origin + '/pair?number=923001234567'
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach((t, i) => {
+        t.classList.toggle('active', (i === 0 && tab === 'pair') || (i === 1 && tab === 'api'))
+      })
+      document.getElementById('tab-pair').style.display = tab === 'pair' ? 'block' : 'none'
+      document.getElementById('tab-api').style.display = tab === 'api' ? 'block' : 'none'
+    }
+
+    async function generateCode() {
+      const number = document.getElementById('phoneInput').value.trim().replace(/[^0-9]/g, '')
+
+      if (!number || number.length < 10) {
+        showError('Please enter a valid number with country code (e.g. 923001234567)')
+        return
+      }
+
+      // UI: loading state
+      setLoading(true)
+      hideError()
+      document.getElementById('result').style.display = 'none'
+
+      try {
+        const res = await fetch(`/pair?number=${number}`)
+        const data = await res.json()
+
+        if (data.error) {
+          showError(data.message || 'Something went wrong. Try again.')
+        } else {
+          document.getElementById('codeValue').textContent = data.code
+          document.getElementById('result').style.display = 'block'
+          document.getElementById('copyBtn').textContent = '📋 Copy Code'
+          document.getElementById('copyBtn').classList.remove('copied')
+        }
+      } catch (err) {
+        showError('Network error. Make sure the server is running.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    function copyCode() {
+      const code = document.getElementById('codeValue').textContent
+      navigator.clipboard.writeText(code).then(() => {
+        const btn = document.getElementById('copyBtn')
+        btn.textContent = '✅ Copied!'
+        btn.classList.add('copied')
+        setTimeout(() => {
+          btn.textContent = '📋 Copy Code'
+          btn.classList.remove('copied')
+        }, 2000)
+      })
+    }
+
+    function setLoading(loading) {
+      const btn = document.getElementById('generateBtn')
+      const spinner = document.getElementById('spinner')
+      const btnText = document.getElementById('btnText')
+      btn.disabled = loading
+      spinner.style.display = loading ? 'block' : 'none'
+      btnText.textContent = loading ? 'Generating...' : 'Generate Pair Code'
+    }
+
+    function showError(msg) {
+      const box = document.getElementById('errorBox')
+      box.textContent = '⚠️ ' + msg
+      box.style.display = 'block'
+    }
+
+    function hideError() {
+      document.getElementById('errorBox').style.display = 'none'
+    }
+
+    // Enter key support
+    document.getElementById('phoneInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') generateCode()
+    })
+  </script>
+</body>
+</html>
